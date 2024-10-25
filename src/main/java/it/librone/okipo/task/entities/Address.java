@@ -26,7 +26,7 @@ public class Address {
     private Instant createdAt;
 
     @Column(name="lastUpdatedAt")
-    @UpdateTimestamp(source = SourceType.DB)
+    //@UpdateTimestamp(source = SourceType.DB)
     private Instant lastUpdatedAt;
 
     @OneToMany(mappedBy = "address")//, cascade = CascadeType.ALL)

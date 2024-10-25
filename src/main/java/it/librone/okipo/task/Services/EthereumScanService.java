@@ -15,13 +15,16 @@ public class EthereumScanService {
     private String apiKey;
 
     public ethScanResponseDTO getTransactions(String hash) {
+    return getTransactions(hash, 0L);
+    }
+    public ethScanResponseDTO getTransactions(String hash, Long startBlock) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api")
                         .queryParam("module", "account")
                         .queryParam("action", "txlist")
                         .queryParam("address", hash)
-                        .queryParam("startblock", 0)
+                        .queryParam("startblock", startBlock)
                         .queryParam("endblock", 99999999)
                         .queryParam("sort", "asc")
                         .queryParam("apikey", apiKey)

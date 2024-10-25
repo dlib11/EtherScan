@@ -14,4 +14,8 @@ public class TransactionServices {
     public void saveAll(List<Transaction> list) {
         transactionRepository.saveAll(list);
     }
+
+    public Long findLastTransactiontimeStamp() {
+        return transactionRepository.findLastTransaction().orElse(0L);
+    }
 }

@@ -13,4 +13,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT t FROM Transaction t WHERE t.address.ethAddress = :address")
     Optional<List<Transaction>> findByDerivedQuery(String address);
+
+    //Long findTopOrderByTimeStamp();
+    @Query("SELECT MAX(t.timeStamp) FROM Transaction t")
+    Optional<Long>findLastTransaction();
+
 }
