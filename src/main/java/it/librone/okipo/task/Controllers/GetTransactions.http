@@ -1,0 +1,7 @@
+### GET
+GET http://localhost:9090/api/v1/getAll?
+    address=0x0063ec2896db3d25194667c9b5ccb69bd860b928&
+    order=desc
+    &page=0
+    &size=40
+###

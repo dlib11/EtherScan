@@ -32,10 +32,10 @@ public class Transaction {
     private String from;
 
     @Column(name="value", nullable = false)
-    private Long value;
+    private Double value;
 
     @Column(name="gas", nullable = false)
-    private Long gas;
+    private Double gas;
 
     @ManyToOne
     @JoinColumn(name = "address", referencedColumnName = "id")

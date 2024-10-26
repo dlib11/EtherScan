@@ -53,11 +53,11 @@ import lombok.Data;
         @JsonProperty("to")
         private String to;
         @JsonProperty("value")
-        private Long value;
+        private Double value;
         @JsonProperty("gas")
-        private Long gas;
+        private Double gas;
         @JsonProperty("gasPrice")
-        private Long gasPrice;
+        private Double gasPrice;
         @JsonProperty("input")
         private String input;
         @JsonProperty("methodId")
@@ -67,13 +67,13 @@ import lombok.Data;
         @JsonProperty("contractAddress")
         private String contractAddress;
         @JsonProperty("cumulativeGasUsed")
-        private String cumulativeGasUsed;
+        private Double cumulativeGasUsed;
         @JsonProperty("txreceipt_status")
         private String txreceiptStatus;
         @JsonProperty("gasUsed")
-        private String gasUsed;
+        private Double gasUsed;
         @JsonProperty("confirmations")
-        private String confirmations;
+        private Long confirmations;
         @JsonProperty("isError")
         private String isError;
         @JsonIgnore

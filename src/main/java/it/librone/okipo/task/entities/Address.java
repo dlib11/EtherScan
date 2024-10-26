@@ -21,6 +21,9 @@ public class Address {
     @Column(name="address", unique = true, nullable = false)
     private String ethAddress;
 
+    @Column(name="balance")
+    private Double balance=0.0;
+
     @Column(name="createdAt")
     @CreationTimestamp(source = SourceType.DB)  // così in automatico mette la data di creazione
     private Instant createdAt;

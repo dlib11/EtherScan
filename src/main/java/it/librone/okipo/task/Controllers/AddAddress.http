@@ -1,0 +1,8 @@
+###
+POST http://localhost:9090/api/v1/add
+Content-Type: application/json
+
+{
+  "address": "0x0063ec2896db3d25194667c9b5ccb69bd860b928"
+}
+###

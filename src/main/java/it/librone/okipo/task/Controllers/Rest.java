@@ -1,104 +1,109 @@
 package it.librone.okipo.task.Controllers;
 
 import it.librone.okipo.task.DTO.AddressDTO;
-import it.librone.okipo.task.DTO.Result;
-import it.librone.okipo.task.DTO.ethScanResponseDTO;
+import it.librone.okipo.task.DTO.TransactionDTO;
 import it.librone.okipo.task.Services.AddressService;
 import it.librone.okipo.task.Services.EthereumScanService;
-import it.librone.okipo.task.Services.TransactionServices;
-import it.librone.okipo.task.Utility.ResultToTransaction;
+import it.librone.okipo.task.Services.TransactionServicesV2;
+import it.librone.okipo.task.Utility.TransactionToDTO;
 import it.librone.okipo.task.entities.Address;
 import it.librone.okipo.task.entities.Transaction;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/v1")
 public class Rest {
 
-    private static final Logger log = LoggerFactory.getLogger(Rest.class);
+    @Autowired
+    private Logger log;
+
     @Autowired
     private AddressService addressService;
 
     @Autowired
-    private TransactionServices transactionService;
+    private TransactionServicesV2 transactionService;
 
     @Autowired
     private EthereumScanService ethereumScanService;
 
-    @RequestMapping(value="/get", method = RequestMethod.GET)
-    @Transactional
+    @Autowired
+    Pattern ethAddressPattern;
+
+    //TODO: cambiare da body a PATH VARIABLE
+    @RequestMapping(value="/add", method = RequestMethod.POST)
+    //@Transactional
     public ResponseEntity<?> get(@RequestBody(required = true) @Valid AddressDTO dto) {
-        log.info("AddressDTO: "+dto.getAddress());
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        log.info("POST /add, address: "+dto.getAddress());
 
         Integer newTransactions= transactionService.saveTransaction(dto.getAddress());
-        return new ResponseEntity<>("Successfully added "+newTransactions+" new transactions", org.springframework.http.HttpStatus.OK);
-
-        // spostato nel service layer
-        /*
-        Address address= addressService.getByEthAddress(dto.getAddress());
-        if(address==null){
-            address= new Address();
-            address.setEthAddress(dto.getAddress());
-            address=addressService.saveAddress(address);
-            List<Result> response = ethereumScanService.getTransactions(address.getEthAddress()).getResult();
-
-            //va dichiarata final sennò non va bene per la lambda expression
-            Address finalAddress = address;
-            List<Transaction> transactions = response.stream().map(Result-> ResultToTransaction.convertToTransaction(Result, finalAddress)).toList();
-            //List<Transaction> transactions = response.stream().map(ResultToTransaction::convertToTransaction).toList();
-
-            transactionService.saveAll(transactions);
-
-            //address.setTransactions(transactions);
-
-            address.setLastUpdatedAt(Instant.now());
-            addressService.saveAddress(address);
-            return new ResponseEntity<>("Success!" + Instant.now(), org.springframework.http.HttpStatus.OK);
-
-        }
-        else {
-            log.info("Address: "+address.getEthAddress());
-            Instant addressLastUpdate=address.getLastUpdatedAt();
-
-            Long transactionLastUpdate=0L;
-            // DEVO PRIMA CONTROLLARE SE CI SONO TRANSAZIONI SALVATE SENNO OTTENGO NULL
-            if(transactionService.findLastTransaction()!=null)
-                transactionLastUpdate=transactionService.findLastTransaction().getBlockNumber();
-            //devo fare transactionLastUpdate +1 per evitare di riprendere la stessa transazione ??
-
-            log.info("transactionLastUpdate: "+transactionLastUpdate);
-
-            List<Result> response = ethereumScanService.getTransactions(address.getEthAddress(),transactionLastUpdate).getResult();
-
-            // aggiungo relazione address alle transaction
-            Address finalAddress = address;
-            List<Transaction> transactions = response.stream().map(Result-> ResultToTransaction.convertToTransaction(Result, finalAddress)).toList();
-
-            Integer transactionSize=transactions.size();
-            if(transactionSize>0)
-                transactionService.saveAll(transactions);
-
-            //in alternativa avrei potuto inserirlo in un metodo @PostSave di Transaction
-            // però facendo così lo modifico una volta sola invece di aggiornarlo una volta per ogni transazione
-            // inoltre se non ci sono transazioni lo aggiorno ugualmente
-            address.setLastUpdatedAt(Instant.now());
-            addressService.saveAddress(address);
-
-            return new ResponseEntity<>("Address already exist, updated "+transactionSize+" transactions!", org.springframework.http.HttpStatus.OK);
-        }
-         */
+        response.put("Result", "Success");
+        response.put("Transaction", newTransactions);
+        return new ResponseEntity<>(response, org.springframework.http.HttpStatus.OK);
     }
+
+    // alternativa a sotto
+    //    @RequestMapping(value="/getAll/{dto}/{order}", method = RequestMethod.GET)
+    //    public ResponseEntity<?> getAll(@PathVariable(required = true) String dto, @PathVariable(required = false) String order) {
+
+
+        @RequestMapping(value="/getAll", method = RequestMethod.GET)
+    public ResponseEntity<?> getAll(@RequestParam(required = true, name = "address") String addressDto,
+                                    @RequestParam(required = false, defaultValue ="asc") String order,
+                                    @RequestParam(required = false, defaultValue = "0") int page,
+                                    @RequestParam(required = false, defaultValue = "10") int size)
+        {
+
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+
+        Matcher matcher= ethAddressPattern.matcher(addressDto);
+        if(!matcher.matches()){
+            response.put("Error", "Invalid address");
+            log.error("GET /getAll, Invalid address "+addressDto);
+            return new ResponseEntity<>(response, org.springframework.http.HttpStatus.BAD_REQUEST);
+        }
+
+        Address address= addressService.getByEthAddress(addressDto);
+        if(address==null){
+            response.put("Error", "Address not found");
+            log.error("GET /getAll, Address not found "+addressDto);
+            return new ResponseEntity<>(response, org.springframework.http.HttpStatus.NOT_FOUND);
+        }
+
+        if(!order.equals("asc") && !order.equals("desc")) {
+            response.put("Error", "Invalid order "+order);
+            log.error("GET /getAll, Invalid order "+order);
+            return new ResponseEntity<>(response, org.springframework.http.HttpStatus.BAD_REQUEST);
+        }
+
+            // NON pageable
+        //List<Transaction> transactions= transactionService.getAllByAddress(address.getEthAddress(), order);
+        //List<TransactionDTO> transactionDTOS= transactions.stream().map(TransactionToDTO::toDTO).toList();
+            // Pageable version
+        Page<Transaction> transactionsPage = transactionService.getAllByAddressPageable(addressDto, order, page, size);
+        List<TransactionDTO> transactionDTOS = transactionsPage.getContent().stream().map(TransactionToDTO::toDTO).toList();
+
+
+        // response.put("Result", transactionDTOS.size());  // NON pageable
+        response.put("Balance", address.getBalance().toString());
+        response.put("TotalPages", transactionsPage.getTotalPages());
+        response.put("TotalElements", transactionsPage.getTotalElements());
+        response.put("Response", transactionDTOS);
+        log.info("GET /getAll, address: "+addressDto+", transactions: "+transactionDTOS.size());
+        return new ResponseEntity<>(response, org.springframework.http.HttpStatus.OK);
+    }
+
+
 }

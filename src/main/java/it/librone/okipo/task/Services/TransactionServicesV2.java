@@ -1,7 +1,7 @@
 package it.librone.okipo.task.Services;
 
 import it.librone.okipo.task.DTO.Result;
-import it.librone.okipo.task.DTO.ethScanResponseDTO;
+import it.librone.okipo.task.DTO.ethScanResponseDTOv2;
 import it.librone.okipo.task.Utility.ResultToTransaction;
 import it.librone.okipo.task.entities.Address;
 import it.librone.okipo.task.entities.Transaction;
@@ -9,18 +9,17 @@ import it.librone.okipo.task.repositories.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
 
-
-
 @Service
-public class TransactionServices {
-/*
-    private static final Logger log = LoggerFactory.getLogger(TransactionServices.class);
+public class TransactionServicesV2 {
+    private static final Logger log = LoggerFactory.getLogger(TransactionServicesV2.class);
     @Autowired
     private TransactionRepository transactionRepository;
 
@@ -34,9 +33,11 @@ public class TransactionServices {
         transactionRepository.saveAll(list);
     }
 
+
     public Long findLastTransactionBlocknum() {
         return transactionRepository.findLastTransaction();
     }
+
     public Integer saveTransaction(String dto) {
         Address address= addressService.getByEthAddress(dto);
         if(address==null){
@@ -44,20 +45,22 @@ public class TransactionServices {
             address.setEthAddress(dto);
             address=addressService.saveAddress(address);
 
-            ethScanResponseDTO ethResponse = ethereumScanService.getTransactionList(address.getEthAddress());
+            ethScanResponseDTOv2 ethResponse = ethereumScanService.getTransactionList(address.getEthAddress());
 
 
-            List<Result> response = ethereumScanService.getTransactionList(address.getEthAddress()).getResult();
+            List<Result> response = ((List<Result>)ethResponse.getResult());
 
 
             //va dichiarata final sennò non va bene per la lambda expression
             Address finalAddress = address;
             List<Transaction> transactions = ((List<Result>)response).stream().map(Result-> ResultToTransaction.convertToTransaction(Result, finalAddress)).toList();
-            //List<Transaction> transactions = response.stream().map(ResultToTransaction::convertToTransaction).toList();
+
 
             saveAll(transactions);
 
-            //address.setTransactions(transactions);
+
+            Double balance=ethereumScanService.getBalance(address.getEthAddress());
+            address.setBalance(balance);
 
             address.setLastUpdatedAt(Instant.now());
             addressService.saveAddress(address);
@@ -83,7 +86,8 @@ public class TransactionServices {
             // SE RIPRENDI DA 101 MAGARI NON PRENDI UN'ALTRA TRANSAZIONE DEL BLOCCO 100 CHE E' STATA FATTA DOPO
             log.info("transactionLastUpdate: "+transactionLastUpdate);
 
-            List<Result> response = ethereumScanService.getTransactionList(address.getEthAddress(),transactionLastUpdate).getResult();
+            ethScanResponseDTOv2 ethResponse = ethereumScanService.getTransactionList(address.getEthAddress(),transactionLastUpdate);
+            List<Result> response = ((List<Result>)ethResponse.getResult());
 
             // aggiungo relazione address alle transaction
             Address finalAddress = address;
@@ -100,9 +104,31 @@ public class TransactionServices {
 
             return transactions.size();
         }
-
-
     }
-*/
-}
 
+    /*
+            NON PAGEABLE
+        public List<Transaction> getAllByAddress(String address, String order){
+            if(order.equals("asc"))
+                return transactionRepository.findByAddress_EthAddressOrderByTimeStampDesc(address);
+            else if(order.equals("desc"))
+                return transactionRepository.findByAddress_EthAddressOrderByTimeStampAsc(address);
+            else
+                return transactionRepository.findByAddress_EthAddressOrderByTimeStampDesc(address);
+        }
+
+     */
+
+        // pageable
+        public Page<Transaction> getAllByAddressPageable(String address, String order, int page, int size) {
+            Pageable pageable = PageRequest.of(page, size);
+            if(order.equals("asc"))
+                return transactionRepository.findByAddress_EthAddressOrderByTimeStampAsc(address, pageable);
+            else
+                return transactionRepository.findByAddress_EthAddressOrderByTimeStampDesc(address, pageable);
+        }
+
+
+
+
+}
