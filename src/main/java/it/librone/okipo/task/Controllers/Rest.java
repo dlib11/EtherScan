@@ -42,6 +42,12 @@ public class Rest {
     @Transactional
     public ResponseEntity<?> get(@RequestBody(required = true) @Valid AddressDTO dto) {
         log.info("AddressDTO: "+dto.getAddress());
+
+        Integer newTransactions= transactionService.saveTransaction(dto.getAddress());
+        return new ResponseEntity<>("Successfully added "+newTransactions+" new transactions", org.springframework.http.HttpStatus.OK);
+
+        // spostato nel service layer
+        /*
         Address address= addressService.getByEthAddress(dto.getAddress());
         if(address==null){
             address= new Address();
@@ -67,7 +73,12 @@ public class Rest {
             log.info("Address: "+address.getEthAddress());
             Instant addressLastUpdate=address.getLastUpdatedAt();
 
-            Long transactionLastUpdate=transactionService.findLastTransactiontimeStamp();
+            Long transactionLastUpdate=0L;
+            // DEVO PRIMA CONTROLLARE SE CI SONO TRANSAZIONI SALVATE SENNO OTTENGO NULL
+            if(transactionService.findLastTransaction()!=null)
+                transactionLastUpdate=transactionService.findLastTransaction().getBlockNumber();
+            //devo fare transactionLastUpdate +1 per evitare di riprendere la stessa transazione ??
+
             log.info("transactionLastUpdate: "+transactionLastUpdate);
 
             List<Result> response = ethereumScanService.getTransactions(address.getEthAddress(),transactionLastUpdate).getResult();
@@ -88,6 +99,6 @@ public class Rest {
 
             return new ResponseEntity<>("Address already exist, updated "+transactionSize+" transactions!", org.springframework.http.HttpStatus.OK);
         }
-
+         */
     }
 }
