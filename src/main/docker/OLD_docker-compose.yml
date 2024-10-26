@@ -1,0 +1,20 @@
+services:
+  app:
+    image: 'ethscanner:latest'
+    build:
+      context: .
+    container_name: app
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/okipo
+      - SPRING_DATASOURCE_USERNAME=okipo
+      - SPRING_DATASOURCE_PASSWORD=mypassword
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  db:
+    image: 'postgres:latest'
+    container_name: db
+    environment:
+      - POSTGRES_USER=okipo
+      - POSTGRES_PASSWORD=mypassword

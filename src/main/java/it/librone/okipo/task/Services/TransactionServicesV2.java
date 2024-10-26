@@ -68,7 +68,7 @@ public class TransactionServicesV2 {
 
         }
         else {
-            log.info("Address: "+address.getEthAddress());
+           // log.info("Address: "+address.getEthAddress());
             Instant addressLastUpdate=address.getLastUpdatedAt();
 
             Long transactionLastUpdate=0L;

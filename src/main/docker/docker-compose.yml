@@ -1,0 +1,34 @@
+services:
+  # Servizio per il database PostgreSQL
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: okipo
+      POSTGRES_USER: okipo
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # Servizio per l'applicazione Spring Boot
+  app:
+    image: ethscanner:latest  # Usa il nome della tua immagine Spring Boot
+    depends_on:
+      - db
+    environment:
+      - server.port=9090
+      - spring.application.name=task
+      - spring.datasource.url=jdbc:postgresql://db:5432/okipo  # `db` si riferisce al servizio PostgreSQL
+      - spring.datasource.username=okipo
+      - spring.datasource.password=mypassword
+      - spring.datasource.driver-class-name=org.postgresql.Driver
+      - spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+      - spring.jpa.hibernate.ddl-auto=update
+      - spring.jpa.show-sql=false
+      - etherscan.apikey=1VHWN5QQXPSKYVU94HDCQXDIM59R5QEHZM
+    ports:
+      - "9090:9090"
+
+volumes:
+  db-data:

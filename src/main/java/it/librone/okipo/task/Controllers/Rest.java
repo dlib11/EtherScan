@@ -42,7 +42,7 @@ public class Rest {
     Pattern ethAddressPattern;
 
     //TODO: cambiare da body a PATH VARIABLE
-    @RequestMapping(value="/add", method = RequestMethod.POST)
+    @RequestMapping(value="/addAddress", method = RequestMethod.POST)
     //@Transactional
     public ResponseEntity<?> get(@RequestBody(required = true) @Valid AddressDTO dto) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
@@ -59,7 +59,7 @@ public class Rest {
     //    public ResponseEntity<?> getAll(@PathVariable(required = true) String dto, @PathVariable(required = false) String order) {
 
 
-        @RequestMapping(value="/getAll", method = RequestMethod.GET)
+        @RequestMapping(value="/transactions", method = RequestMethod.GET)
     public ResponseEntity<?> getAll(@RequestParam(required = true, name = "address") String addressDto,
                                     @RequestParam(required = false, defaultValue ="asc") String order,
                                     @RequestParam(required = false, defaultValue = "0") int page,
