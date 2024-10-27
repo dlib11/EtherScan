@@ -10,7 +10,6 @@ import it.librone.okipo.task.entities.Address;
 import it.librone.okipo.task.entities.Transaction;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -41,9 +40,7 @@ public class Rest {
     @Autowired
     Pattern ethAddressPattern;
 
-    //TODO: cambiare da body a PATH VARIABLE
-    @RequestMapping(value="/addAddress", method = RequestMethod.POST)
-    //@Transactional
+     @RequestMapping(value="/addAddress", method = RequestMethod.POST)
     public ResponseEntity<?> get(@RequestBody(required = true) @Valid AddressDTO dto) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
         log.info("POST /add, address: "+dto.getAddress());
@@ -53,10 +50,6 @@ public class Rest {
         response.put("Transaction", newTransactions);
         return new ResponseEntity<>(response, org.springframework.http.HttpStatus.OK);
     }
-
-    // alternativa a sotto
-    //    @RequestMapping(value="/getAll/{dto}/{order}", method = RequestMethod.GET)
-    //    public ResponseEntity<?> getAll(@PathVariable(required = true) String dto, @PathVariable(required = false) String order) {
 
 
         @RequestMapping(value="/transactions", method = RequestMethod.GET)

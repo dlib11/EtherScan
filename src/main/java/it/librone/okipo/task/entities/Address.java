@@ -25,13 +25,13 @@ public class Address {
     private Double balance=0.0;
 
     @Column(name="createdAt")
-    @CreationTimestamp(source = SourceType.DB)  // così in automatico mette la data di creazione
+    @CreationTimestamp(source = SourceType.DB)
     private Instant createdAt;
 
     @Column(name="lastUpdatedAt")
     //@UpdateTimestamp(source = SourceType.DB)
     private Instant lastUpdatedAt;
 
-    @OneToMany(mappedBy = "address")//, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "address")
     private List<Transaction> transactions;
 }

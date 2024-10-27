@@ -6,3 +6,18 @@ Content-Type: application/json
   "address": "0x0063ec2896db3d25194667c9b5ccb69bd860b928"
 }
 ###
+POST http://localhost:9090/api/v1/addAddress
+Content-Type: application/json
+
+{
+  "address": "0x53d9113d353102ffae5a0550b3253a9945ca6907"
+}
+###
+###
+POST http://localhost:9090/api/v1/addAddress
+Content-Type: application/json
+
+{
+  "address": "0x28561b8a2360f463011c16b6cc0b0cbef8dbbcad"
+}
+###

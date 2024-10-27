@@ -14,7 +14,12 @@ import java.util.regex.Pattern;
 public class config {
     @Bean
     public WebClient getWebClientBuilder() {
-        return WebClient.builder().baseUrl("https://api.etherscan.io").build();
+
+        return WebClient
+                .builder()
+                .baseUrl("https://api.etherscan.io")
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024)) //
+                .build();
     }
 
     @Bean

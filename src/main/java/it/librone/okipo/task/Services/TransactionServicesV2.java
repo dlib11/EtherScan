@@ -1,7 +1,6 @@
 package it.librone.okipo.task.Services;
 
 import it.librone.okipo.task.DTO.Result;
-import it.librone.okipo.task.DTO.ethScanResponseDTOv2;
 import it.librone.okipo.task.Utility.ResultToTransaction;
 import it.librone.okipo.task.entities.Address;
 import it.librone.okipo.task.entities.Transaction;
@@ -34,8 +33,8 @@ public class TransactionServicesV2 {
     }
 
 
-    public Long findLastTransactionBlocknum() {
-        return transactionRepository.findLastTransaction();
+    public Long findLastTransactionBlocknum(String address) {
+        return transactionRepository.findLastTransaction(address).orElse(0L);
     }
 
     public Integer saveTransaction(String dto) {
@@ -45,63 +44,46 @@ public class TransactionServicesV2 {
             address.setEthAddress(dto);
             address=addressService.saveAddress(address);
 
-            ethScanResponseDTOv2 ethResponse = ethereumScanService.getTransactionList(address.getEthAddress());
+            List<Result> response = ethereumScanService.getTransactionList(address.getEthAddress());
 
-
-            List<Result> response = ((List<Result>)ethResponse.getResult());
-
-
-            //va dichiarata final sennò non va bene per la lambda expression
             Address finalAddress = address;
             List<Transaction> transactions = ((List<Result>)response).stream().map(Result-> ResultToTransaction.convertToTransaction(Result, finalAddress)).toList();
 
-
             saveAll(transactions);
-
 
             Double balance=ethereumScanService.getBalance(address.getEthAddress());
             address.setBalance(balance);
 
             address.setLastUpdatedAt(Instant.now());
             addressService.saveAddress(address);
+
+            if(transactions.size()==10000)
+                return transactions.size()+saveTransaction(dto);
+
             return transactions.size();
 
         }
         else {
-           // log.info("Address: "+address.getEthAddress());
-            Instant addressLastUpdate=address.getLastUpdatedAt();
 
             Long transactionLastUpdate=0L;
-            // DEVO PRIMA CONTROLLARE SE CI SONO TRANSAZIONI SALVATE SENNO OTTENGO NULL
-            // CHE SUCCEDE SE NON CI SONO TRANSAZIONI SALVATE?
-            // SE NON CI SONO TRANSAZIONI SALVATE DEVO PARTIRE DA 0
-            // SE CI SONO TRANSAZIONI SALVATE DEVO PARTIRE DAL BLOCCO SUCCESSIVO
-            if(findLastTransactionBlocknum()>0)
-                // NEL CASO NON CI SIANO MI RESTITUISCE 0??
-                transactionLastUpdate=findLastTransactionBlocknum()+1;
-            //devo fare transactionLastUpdate +1 per evitare di riprendere la stessa transazione ??
+            if(findLastTransactionBlocknum(address.getEthAddress())>0)
+                transactionLastUpdate=findLastTransactionBlocknum(address.getEthAddress())+1;
 
-            // IMPORTANTE, DEVO RIPRENDERE LO STESSO BLOCK INVECE DI +1
-            // METTI CHE L'ULTIMA TRANSAZIONE SALVATA E' AL BLOCK 100
-            // SE RIPRENDI DA 101 MAGARI NON PRENDI UN'ALTRA TRANSAZIONE DEL BLOCCO 100 CHE E' STATA FATTA DOPO
             log.info("transactionLastUpdate: "+transactionLastUpdate);
 
-            ethScanResponseDTOv2 ethResponse = ethereumScanService.getTransactionList(address.getEthAddress(),transactionLastUpdate);
-            List<Result> response = ((List<Result>)ethResponse.getResult());
+           List<Result> response = ethereumScanService.getTransactionList(address.getEthAddress(),transactionLastUpdate);
 
-            // aggiungo relazione address alle transaction
             Address finalAddress = address;
             List<Transaction> transactions = ((List<Result>)response).stream().map(Result-> ResultToTransaction.convertToTransaction(Result, finalAddress)).toList();
 
             if(!transactions.isEmpty())
                 saveAll(transactions);
 
-            //in alternativa avrei potuto inserirlo in un metodo @PostSave di Transaction
-            // però facendo così lo modifico una volta sola invece di aggiornarlo una volta per ogni transazione
-            // inoltre se non ci sono transazioni lo aggiorno ugualmente
             address.setLastUpdatedAt(Instant.now());
             addressService.saveAddress(address);
 
+            if(transactions.size()==10000)
+                return transactions.size()+saveTransaction(dto);
             return transactions.size();
         }
     }

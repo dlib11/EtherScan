@@ -4,7 +4,7 @@ Per eseguire l'applicazione è necessario avere installato Docker e Docker Compo
 \
 Non è necessario installare Postgres in quanto è già presente nel docker-compose.yml.
 
-L'ApiKey di Etherscan è già presente nel Dockerfile
+L'ApiKey di Etherscan è già presente nel Dockerfile. 
 ```:
 1. Scaricare il progetto con il comando git-clone
 2. Posizionarsi nella cartella src da terminale
@@ -63,4 +63,4 @@ Problematiche riscontrate sul modello
 ==============================
 1. Se carichiamo due volte la stessa transazione per due indirizzi diversi il modello va in errore poichè è chiave primaria
 
-Si potrebbe risolvere creando una tabella di join tra transazioni e indirizzi però ho preferito attenermi al modello stabilito
+Si potrebbe risolvere cambiando la chiave primaria o creando una tabella di join tra transazioni e indirizzi però ho preferito attenermi al modello stabilito

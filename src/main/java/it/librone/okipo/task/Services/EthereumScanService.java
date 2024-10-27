@@ -1,5 +1,6 @@
 package it.librone.okipo.task.Services;
 
+import it.librone.okipo.task.DTO.Result;
 import it.librone.okipo.task.DTO.ethScanBalanceDTO;
 import it.librone.okipo.task.DTO.ethScanResponseDTOv2;
 import it.librone.okipo.task.Exceptions.ApiKeyNotValidException;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.List;
 
 @Service
 public class EthereumScanService {
@@ -41,17 +44,17 @@ public class EthereumScanService {
                 .block();
     }
 
-    public ethScanResponseDTOv2 getTransactionList(String hash) {
+    public List<Result> getTransactionList(String hash) {
         return getTransactionList(hash, 0L);
     }
 
-    public ethScanResponseDTOv2 getTransactionList(String hash, Long startBlock){
+    public List<Result> getTransactionList(String hash, Long startBlock){
         ethScanResponseDTOv2 response= getTransactions(hash, startBlock);
-        //if(response.getStatus().equals("0")){
+
         if(response.getMessage().equals("NOTOK")){
             throw new ApiKeyNotValidException("EtherScan "+(String)response.getResult());
         }
-        return response;
+        return (List<Result>) response.getResult();//response;
     }
 
     public Double getBalance(String hash) {
