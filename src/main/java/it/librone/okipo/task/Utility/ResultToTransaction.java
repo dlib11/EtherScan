@@ -7,6 +7,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ResultToTransaction {
+    /**
+     * Metodo per convertire un oggetto dto Result in un oggetto Transaction
+     * @param result
+     * @param address
+     * @return
+     */
 
     public static Transaction convertToTransaction(Result result, Address address) {
         return  new Transaction().builder()
@@ -19,6 +25,5 @@ public class ResultToTransaction {
                 .gas(result.getGas())
                 .address(address)
                 .build();
-        //return transaction;
     }
 }

@@ -12,6 +12,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
+/**
+ * Classe per gestire le chiamate all'API di Etherscan
+ */
 @Service
 public class EthereumScanService {
     @Autowired
@@ -20,9 +23,12 @@ public class EthereumScanService {
     @Value("${etherscan.apikey}")
     private String apiKey;
 
-    public ethScanResponseDTOv2 getTransactions(String hash) {
-    return getTransactions(hash, 0L);
-    }
+    /**
+     * Metodo per ottenere le transazioni di un indirizzo
+     * @param hash
+     * @param startBlock
+     * @return
+     */
     public ethScanResponseDTOv2 getTransactions(String hash, Long startBlock) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -48,6 +54,14 @@ public class EthereumScanService {
         return getTransactionList(hash, 0L);
     }
 
+    /**
+     * Metodo per ottenere le transazioni di un indirizzo a partire da un blocco specifico
+     * In questo metodo verifico anche se l'API key è valida ed in caso negativo lancio un'eccezione
+     * Chiamata di tipo Sincrona
+     * @param hash
+     * @param startBlock
+     * @return
+     */
     public List<Result> getTransactionList(String hash, Long startBlock){
         ethScanResponseDTOv2 response= getTransactions(hash, startBlock);
 
@@ -56,6 +70,13 @@ public class EthereumScanService {
         }
         return (List<Result>) response.getResult();//response;
     }
+
+    /**
+     * Metodo per ottenere il saldo di un indirizzo
+     * Chiamata di tipo Sincrona
+     * @param hash
+     * @return
+     */
 
     public Double getBalance(String hash) {
         ethScanBalanceDTO response = webClient.get()

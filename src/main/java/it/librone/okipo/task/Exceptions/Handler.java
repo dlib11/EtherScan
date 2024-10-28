@@ -12,13 +12,19 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
-
+/**
+ * Classe per gestire le eccezioni
+ */
 @ControllerAdvice
 public class Handler {
 
     @Autowired
     private Logger log;
 
+    /**
+     * Gestisce le eccezioni di validazione
+     * @param ex
+     */
     @ExceptionHandler(MethodArgumentNotValidException .class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {

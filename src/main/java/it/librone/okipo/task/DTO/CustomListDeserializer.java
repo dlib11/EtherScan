@@ -10,6 +10,9 @@ import it.librone.okipo.task.Exceptions.GenericEthScanException;
 
 import java.io.IOException;
 import java.util.List;
+/**
+ * Custom deserializer per deserialize la risposta di EtherScan che può essere sia una stringa che un array
+ */
 public class CustomListDeserializer extends JsonDeserializer<Object> {
     @Override
     public Object deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
@@ -17,14 +20,12 @@ public class CustomListDeserializer extends JsonDeserializer<Object> {
 
         // Controllo se sia una stringa o un array
         if (jsonParser.currentToken() == JsonToken.VALUE_STRING) {
-            return jsonParser.getText();  // Return as a String
+            return jsonParser.getText();  // Nel caso sia una stringa
         } else if (jsonParser.currentToken() == JsonToken.START_ARRAY) {
-            // Deserialize come List<Transaction>
             return mapper.readValue(jsonParser, new TypeReference<List<Result>>() {});
         }
 
         throw new GenericEthScanException("Errore durante la deserializzazione della risposta di EtherScan");
-        //return null;
     }
 
 }

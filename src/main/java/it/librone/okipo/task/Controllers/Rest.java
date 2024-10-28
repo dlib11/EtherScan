@@ -40,6 +40,14 @@ public class Rest {
     @Autowired
     Pattern ethAddressPattern;
 
+
+    /**
+     * Endpoint per aggiungere un address e scaricare le transactions.
+     *
+     * @param dto AddressDTO con l'address da aggiungere
+     * @return ResponseEntity con il numero di transazioni aggiunte
+     */
+
      @RequestMapping(value="/addAddress", method = RequestMethod.POST)
     public ResponseEntity<?> get(@RequestBody(required = true) @Valid AddressDTO dto) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
@@ -51,6 +59,16 @@ public class Rest {
         return new ResponseEntity<>(response, org.springframework.http.HttpStatus.OK);
     }
 
+
+    /**
+     * Endpoint per ottenere le transactions di un address.
+     *
+     * @param addressDto l'address di cui ottenere le transactions
+     * @param order l'ordine delle transactions (asc o desc)
+     * @param page il numero di pagine per la paginazione
+     * @param size il numero di transactions per pagina
+     * @return ResponseEntity con le transactions
+     */
 
         @RequestMapping(value="/transactions", method = RequestMethod.GET)
     public ResponseEntity<?> getAll(@RequestParam(required = true, name = "address") String addressDto,

@@ -27,7 +27,6 @@ public class ethScanResponseDTOv2 {
         private Object result;
 
 
-        //ignoro eventuali field non necessari
        // @JsonIgnore
         private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 

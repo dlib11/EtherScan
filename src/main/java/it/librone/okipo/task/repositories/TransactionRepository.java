@@ -24,6 +24,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
   //  List<Transaction> findByAddress_EthAddressOrderByTimeStampDesc(String address);
   //  List<Transaction> findByAddress_EthAddressOrderByTimeStampAsc(String address);
 
+    // PAGEABLE
     Page<Transaction> findByAddress_EthAddressOrderByTimeStampDesc(String address, Pageable pageable);
     Page<Transaction> findByAddress_EthAddressOrderByTimeStampAsc(String address, Pageable pageable);
 }
