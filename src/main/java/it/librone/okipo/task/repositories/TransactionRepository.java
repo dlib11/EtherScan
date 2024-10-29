@@ -20,9 +20,18 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT MAX(t.blockNumber) FROM Transaction t WHERE t.address.ethAddress = :address")
     Optional<Long> findLastTransaction(String address);
 
+    /**
+     * Metodo per ottenere tutte le transazioni di un indirizzo
+     * Preferibile rispetto al metodo findByAddress_EthAddressOrderByTimeStampDesc poichè evita il problema della relazione univoca di un indirizzo con una transazione
+     * @param address
+     * @return
+     */
+    @Query("SELECT t from Transaction t Where t.from = :address OR t.to = :address")
+    Optional<List<Transaction>> findByAddress(String address);
+
     // NON PAGEABLE
-  //  List<Transaction> findByAddress_EthAddressOrderByTimeStampDesc(String address);
-  //  List<Transaction> findByAddress_EthAddressOrderByTimeStampAsc(String address);
+    //  List<Transaction> findByAddress_EthAddressOrderByTimeStampDesc(String address);
+    //  List<Transaction> findByAddress_EthAddressOrderByTimeStampAsc(String address);
 
     // PAGEABLE
     Page<Transaction> findByAddress_EthAddressOrderByTimeStampDesc(String address, Pageable pageable);

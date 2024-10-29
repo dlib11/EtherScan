@@ -56,54 +56,33 @@ public class TransactionServicesV2 {
     @Transactional
     public Integer saveTransaction(String dto) {
         Address address= addressService.getByEthAddress(dto);
-        if(address==null){
-            address= new Address();
-            address.setEthAddress(dto);
-            address=addressService.saveAddress(address);
 
-            List<Result> response = ethereumScanService.getTransactionList(address.getEthAddress());
+        if(address==null)
+            address= addressService.saveAddress(dto);
 
-            Address finalAddress = address;
-            List<Transaction> transactions = ((List<Result>)response).stream().map(Result-> ResultToTransaction.convertToTransaction(Result, finalAddress)).toList();
+        Long transactionLastUpdate=0L;
+        if(findLastTransactionBlocknum(address.getEthAddress())>0)
+           transactionLastUpdate=findLastTransactionBlocknum(address.getEthAddress())+1;
 
-            saveAll(transactions);
+           // log.info("transactionLastUpdate: "+transactionLastUpdate);
 
-            Double balance=ethereumScanService.getBalance(address.getEthAddress());
-            address.setBalance(balance);
+        List<Result> response = ethereumScanService.getTransactionList(address.getEthAddress(),transactionLastUpdate);
 
-            address.setLastUpdatedAt(Instant.now());
-            addressService.saveAddress(address);
+        Address finalAddress = address;
+        List<Transaction> transactions = ((List<Result>)response).stream().map(Result-> ResultToTransaction.convertToTransaction(Result, finalAddress)).toList();
 
-            if(transactions.size()==10000)
-                return transactions.size()+saveTransaction(dto);
+        if(!transactions.isEmpty())
+           saveAll(transactions);
 
-            return transactions.size();
+        address.setLastUpdatedAt(Instant.now());
+        addressService.saveAddress(address);
 
-        }
-        else {
+       // if(transactions.size()==10000)
+        //   return transactions.size()+saveTransaction(dto);
+        return transactions.size();
 
-            Long transactionLastUpdate=0L;
-            if(findLastTransactionBlocknum(address.getEthAddress())>0)
-                transactionLastUpdate=findLastTransactionBlocknum(address.getEthAddress())+1;
-
-            log.info("transactionLastUpdate: "+transactionLastUpdate);
-
-           List<Result> response = ethereumScanService.getTransactionList(address.getEthAddress(),transactionLastUpdate);
-
-            Address finalAddress = address;
-            List<Transaction> transactions = ((List<Result>)response).stream().map(Result-> ResultToTransaction.convertToTransaction(Result, finalAddress)).toList();
-
-            if(!transactions.isEmpty())
-                saveAll(transactions);
-
-            address.setLastUpdatedAt(Instant.now());
-            addressService.saveAddress(address);
-
-            if(transactions.size()==10000)
-                return transactions.size()+saveTransaction(dto);
-            return transactions.size();
-        }
     }
+
 
     /*
             NON PAGEABLE

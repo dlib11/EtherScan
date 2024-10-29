@@ -22,6 +22,12 @@ public class AddressService {
         return addressRepository.save(address);
     }
 
+    public Address saveAddress(String address) {
+        Address add= new Address();
+        add.setEthAddress(address);
+        return addressRepository.save(add);
+    }
+
     public void save(Long id) {
         addressRepository.deleteById(id);
     }
