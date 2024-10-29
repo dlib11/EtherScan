@@ -61,6 +61,8 @@ Sviluppi futuri
 
 Problematiche riscontrate sul modello
 ==============================
-1. Se carichiamo due volte la stessa transazione per due indirizzi diversi il modello va in errore poichè è chiave primaria
+1. Se carichiamo due volte la stessa transazione per due indirizzi diversi si verifica un'anomalia: la transazione viene associata ad uno solo dei due address
 
-Si potrebbe risolvere cambiando la chiave primaria o creando una tabella di join tra transazioni e indirizzi però ho preferito attenermi al modello stabilito
+Si potrebbe risolvere cambiando la chiave primaria o creando una tabella di join tra transazioni e indirizzi però ho preferito attenermi al modello stabilito.
+
+Tenendo lo stesso modello si potrebbe definire una custom Query del tipo  @Query("SELECT t from Transaction t Where t.from = :address OR t.to = :address")
