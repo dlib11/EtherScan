@@ -4,7 +4,7 @@ Per eseguire l'applicazione è necessario avere installato Docker e Docker Compo
 \
 Non è necessario installare Postgres in quanto è già presente nel docker-compose.yml.
 
-L'ApiKey di Etherscan è già presente nel Dockerfile. 
+L'ApiKey di Etherscan va inserito nel file Docker-compose.yml tra le variabili d'ambiente, etherscan.apikey={API-KEY} 
 ```:
 1. Scaricare il progetto con il comando git-clone
 2. Posizionarsi nella cartella src da terminale
