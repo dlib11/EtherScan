@@ -15,6 +15,8 @@ L'ApiKey di Etherscan va inserito nel file Docker-compose.yml tra le variabili d
 6. Eseguire il comando docker-compose up
 
 L'applicazione sarà disponibile all'indirizzo http://localhost:9090
+
+I log dell'applicazione sono disponibili su file testuali 
 ```
 
 

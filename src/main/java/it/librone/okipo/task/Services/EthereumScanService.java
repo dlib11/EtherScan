@@ -5,6 +5,7 @@ import it.librone.okipo.task.DTO.ethScanBalanceDTO;
 import it.librone.okipo.task.DTO.ethScanResponseDTOv2;
 import it.librone.okipo.task.Exceptions.ApiKeyNotValidException;
 import it.librone.okipo.task.Exceptions.GenericEthScanException;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,9 @@ import java.util.List;
  */
 @Service
 public class EthereumScanService {
+    @Autowired
+    private Logger log;
+
     @Autowired
     WebClient webClient;
 
@@ -68,6 +72,7 @@ public class EthereumScanService {
         if(response.getMessage().equals("NOTOK")){
             throw new ApiKeyNotValidException("EtherScan "+(String)response.getResult());
         }
+        log.info("EtherScan getTransaction: OK");
         return (List<Result>) response.getResult();//response;
     }
 
@@ -99,6 +104,7 @@ public class EthereumScanService {
         if(response.getMessage().equals("NOTOK")){
             throw new ApiKeyNotValidException("EtherScan "+response.getResult());
         }
+        log.info("EtherScan getBalance: OK");
         return Double.parseDouble(response.getResult());
     }
 }
