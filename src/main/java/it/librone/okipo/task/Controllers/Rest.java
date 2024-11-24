@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/v1")
+@CrossOrigin(origins = "http://localhost:4200")
 public class Rest {
 
     @Autowired

@@ -77,8 +77,8 @@ public class TransactionServicesV2 {
         address.setLastUpdatedAt(Instant.now());
         addressService.saveAddress(address);
 
-       // if(transactions.size()==10000)
-        //   return transactions.size()+saveTransaction(dto);
+        if(transactions.size()==10000)
+           return transactions.size()+saveTransaction(dto);
         return transactions.size();
 
     }

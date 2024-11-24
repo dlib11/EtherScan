@@ -2,6 +2,8 @@ package it.librone.okipo.task.Utility;
 
 import it.librone.okipo.task.DTO.TransactionDTO;
 import it.librone.okipo.task.entities.Transaction;
+import org.springframework.stereotype.Component;
+
 
 public class TransactionToDTO {
     /**
