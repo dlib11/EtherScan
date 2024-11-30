@@ -1,13 +1,16 @@
 package it.librone.okipo.task.Services;
 
+import feign.Response;
 import it.librone.okipo.task.DTO.Result;
 import it.librone.okipo.task.DTO.ethScanBalanceDTO;
 import it.librone.okipo.task.DTO.ethScanResponseDTOv2;
 import it.librone.okipo.task.Exceptions.ApiKeyNotValidException;
 import it.librone.okipo.task.Exceptions.GenericEthScanException;
+import it.librone.okipo.task.Services.Client.EthScanFeign;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -27,31 +30,46 @@ public class EthereumScanService {
     @Value("${etherscan.apikey}")
     private String apiKey;
 
+    @Autowired
+    private EthScanFeign ethScanFeign;
+
     /**
      * Metodo per ottenere le transazioni di un indirizzo
      * @param hash
      * @param startBlock
      * @return
      */
+//    public ethScanResponseDTOv2 getTransactions(String hash, Long startBlock) {
+//        return webClient.get()
+//                .uri(uriBuilder -> uriBuilder
+//                        .path("/api")
+//                        .queryParam("module", "account")
+//                        .queryParam("action", "txlist")
+//                        .queryParam("address", hash)
+//                        .queryParam("startblock", startBlock)
+//                        .queryParam("endblock", 99999999)
+//                        .queryParam("sort", "asc")
+//                        .queryParam("apikey", apiKey)
+//                        .build()
+//                )
+//                .header("Content-Type", "application/json")
+//                .retrieve()
+//                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+//                        clientResponse -> clientResponse.bodyToMono(String.class).map(body -> new GenericEthScanException(body)))
+//                .bodyToMono(ethScanResponseDTOv2.class)
+//                .block();
+//    }
+
+//    Metodo aggiornato usando FEIGN CLIENT
     public ethScanResponseDTOv2 getTransactions(String hash, Long startBlock) {
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api")
-                        .queryParam("module", "account")
-                        .queryParam("action", "txlist")
-                        .queryParam("address", hash)
-                        .queryParam("startblock", startBlock)
-                        .queryParam("endblock", 99999999)
-                        .queryParam("sort", "asc")
-                        .queryParam("apikey", apiKey)
-                        .build()
-                )
-                .header("Content-Type", "application/json")
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
-                        clientResponse -> clientResponse.bodyToMono(String.class).map(body -> new GenericEthScanException(body)))
-                .bodyToMono(ethScanResponseDTOv2.class)
-                .block();
+        ResponseEntity<ethScanResponseDTOv2> response = ethScanFeign.getTransactions("account",
+                "txlist",
+                hash,
+                startBlock.toString(),
+                "99999999",
+                "asc",
+                apiKey);
+                return response.getBody();
     }
 
     public List<Result> getTransactionList(String hash) {
